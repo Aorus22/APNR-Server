@@ -8,7 +8,7 @@ export async function handleDetect (req, res) {
       return res.status(400).json({ message: "No image uploaded" });
     }
 
-    const { uid } = req.body
+    const { uid } = req.cookies
 
     const result = await dummyMLModel(req.file.buffer);
     const { plateNumber, region } = result;
@@ -28,7 +28,7 @@ export async function handleDetect (req, res) {
 
 export async function handleGetList(req, res) {
   try {
-    const { uid } = req.body;
+    const { uid } = req.cookies;
 
     const result = await getUserPlateData(uid);
 
@@ -44,10 +44,14 @@ export async function handleGetList(req, res) {
 
 export async function handleGetDetail(req, res) {
   try {
-    // const { uid } = req.body;
+    const { uid } = req.cookies;
     const { plateDataId } = req.params
 
     const result = await getVehicleById(plateDataId);
+
+    if (result.owner !== uid) {
+      return res.status(403).json({ error: "You do not have permission to access this resource." });
+    }
 
     if (result.message) {
       return res.status(200).json(result);
