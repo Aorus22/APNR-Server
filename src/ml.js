@@ -26,7 +26,7 @@ export default async function predictImage(image) {
     return {
       plateNumber: plate.plate_number,
       region: plate.region,
-      annotatedImage: annotated_image
+      annotated_image: annotated_image
     };
 
   } catch (error) {

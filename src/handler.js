@@ -1,6 +1,8 @@
+import imageType from "image-type";
 import { getUserPlateData, getVehicleById, saveToFirestore } from "./firestore.js";
 import uploadToGCS from "./gcs.js";
 import predictImage from "./ml.js";
+import { base64ToBuffer } from "./utils.js";
 
 export async function handleDetect (req, res) {
   try {
@@ -17,11 +19,14 @@ export async function handleDetect (req, res) {
       return res.status(404).json({ message: predictError });
     }
 
-    const { plateNumber, region } = result;
+    const { annotated_image, plateNumber, region } = result;
+    const image = base64ToBuffer(annotated_image);
+    const type = imageType(image);
+
     const timestamp = Date.now()
 
     const fileName = `${plateNumber}-${timestamp}.jpg`;
-    const publicUrl = await uploadToGCS(req.file.buffer, fileName, req.file.mimetype);
+    const publicUrl = await uploadToGCS(image, fileName, type.mime);
 
     const plateDataID = await saveToFirestore(uid, plateNumber, region, publicUrl, timestamp);
 
