@@ -47,8 +47,6 @@ async function handleLogin (req, res) {
       sameSite: 'None',
     })
 
-
-    console.log(decodedToken)
     return res.status(200).json({ message: "Login successful", user: {email, name, picture} });
   } catch (error) {
     console.error("Error verifying token:", error);

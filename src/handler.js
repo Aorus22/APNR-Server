@@ -1,6 +1,6 @@
 import { getUserPlateData, getVehicleById, saveToFirestore } from "./firestore.js";
 import uploadToGCS from "./gcs.js";
-import dummyMLModel from "./ml.js";
+import predictImage from "./ml.js";
 
 export async function handleDetect (req, res) {
   try {
@@ -10,7 +10,13 @@ export async function handleDetect (req, res) {
 
     const { uid } = req.cookies
 
-    const result = await dummyMLModel(req.file.buffer);
+    let result;
+    try {
+      result = await predictImage(req.file.buffer);
+    } catch (predictError) {
+      return res.status(404).json({ message: predictError });
+    }
+
     const { plateNumber, region } = result;
     const timestamp = Date.now()
 

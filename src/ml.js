@@ -1,22 +1,39 @@
-export default async function dummyMLModel(imageBuffer) {
-  const generateRandomPlateNumber = () => {
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const numbers = Math.floor(1000 + Math.random() * 9000); 
-    const randomLetters = `${letters.charAt(Math.floor(Math.random() * letters.length))}${letters.charAt(Math.floor(Math.random() * letters.length))}${letters.charAt(Math.floor(Math.random() * letters.length))}`;
-    return `B${numbers}${randomLetters}`;
-  };
+import axios from 'axios';
+import FormData from 'form-data';
 
-  const getRandomRegion = () => {
-    const regions = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Yogyakarta', 'Bali'];
-    return regions[Math.floor(Math.random() * regions.length)];
-  };
+export default async function predictImage(image) {
+  try {
+    const form = new FormData();
+    form.append('file', image, {
+      filename: 'image.jpg',
+      contentType: 'image/jpeg',
+    });
 
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        plateNumber: generateRandomPlateNumber(),
-        region: getRandomRegion(),
-      });
-    }, 1000);
-  });
-};
+    const response = await axios.post('https://apnr-ml-994118876089.asia-southeast2.run.app/predict', form, {
+        headers: {
+          ...form.getHeaders(),
+        },
+    });
+
+    const { annotated_image, plates } = response.data;
+
+    if (!plates || plates.length === 0) {
+      throw new Error('No plate detected');
+    }
+
+    const plate = plates[0];
+
+    return {
+      plateNumber: plate.plate_number,
+      region: plate.region,
+      annotatedImage: annotated_image
+    };
+
+  } catch (error) {
+
+    if (error.message === 'No plate detected') {
+      throw new Error('No plate detected');
+    }
+    throw error;
+  }
+}
