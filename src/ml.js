@@ -1,6 +1,8 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
+const ML_URL = 'https://apnr-ml-994118876089.asia-southeast2.run.app/predict';
+
 export default async function predictImage(image) {
   try {
     const form = new FormData();
@@ -9,7 +11,7 @@ export default async function predictImage(image) {
       contentType: 'image/jpeg',
     });
 
-    const response = await axios.post('https://apnr-ml-994118876089.asia-southeast2.run.app/predict', form, {
+    const response = await axios.post( ML_URL, form, {
         headers: {
           ...form.getHeaders(),
         },

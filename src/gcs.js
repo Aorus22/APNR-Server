@@ -1,10 +1,12 @@
 import { Storage } from '@google-cloud/storage';
 import serviceAccount from "../credentials.json" assert { type: "json" };
 
+const BUCKET_NAME = "vehicle-images-apnr"
+
 const storage = new Storage({
   credentials: serviceAccount
 });
-const bucket = storage.bucket("vehicle-images-apnr");
+const bucket = storage.bucket(BUCKET_NAME);
 
 export default async function uploadToGCS(fileBuffer, fileName, contentType) {
   try {

@@ -16,7 +16,7 @@ export async function handleDetect (req, res) {
     try {
       result = await predictImage(req.file.buffer);
     } catch (predictError) {
-      return res.status(404).json({ message: predictError });
+      return res.status(404).json({ error: "No plate detected" });
     }
 
     const { annotated_image, plateNumber, region } = result;

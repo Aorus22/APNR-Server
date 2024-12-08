@@ -13,8 +13,6 @@ export async function createNewUser(uid, email, name) {
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
     console.log(`User ${uid} created successfully.`);
-  } else {
-    console.log(`User ${uid} already exists.`);
   }
 }
 
