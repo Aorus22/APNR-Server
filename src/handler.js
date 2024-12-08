@@ -16,21 +16,32 @@ export async function handleDetect (req, res) {
     try {
       result = await predictImage(req.file.buffer);
     } catch (predictError) {
-      return res.status(404).json({ error: "No plate detected" });
+      return res.status(400).json({ error: "No plate detected" });
     }
 
-    const { annotated_image, plateNumber, region } = result;
-    const image = base64ToBuffer(annotated_image);
-    const type = imageType(image);
+    let platesDataID = [];
+    await Promise.all(
+      result.map(async (item) => {
+        const plateNumber = item.plate_number;
+        const region = item.region;
+    
+        const image = base64ToBuffer(item.annotated_image);
+        const type = imageType(image);
+    
+        const timestamp = Date.now();
+        const fileName = `${plateNumber}-${timestamp}.jpg`;
+    
+        const publicUrl = await uploadToGCS(image, fileName, type.mime);
+        const plateDataID = await saveToFirestore(uid, plateNumber, region, publicUrl, timestamp);
+        platesDataID.push(plateDataID);
+      })
+    );
 
-    const timestamp = Date.now()
-
-    const fileName = `${plateNumber}-${timestamp}.jpg`;
-    const publicUrl = await uploadToGCS(image, fileName, type.mime);
-
-    const plateDataID = await saveToFirestore(uid, plateNumber, region, publicUrl, timestamp);
-
-    return res.status(200).json({ message: 'Success', redirect: plateDataID });
+    if (platesDataID.length === 1 ) {
+      return res.status(200).json({ message: 'Success', redirect: platesDataID[0] });
+    }
+    console.log(platesDataID)
+    return res.status(200).json({ message: 'Success', redirect: `?items=${platesDataID.join(",")}` });
   } catch (error) {
     console.error('Error:', error);
     return res.status(500).json({ message: 'Failed' });
