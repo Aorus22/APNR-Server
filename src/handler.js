@@ -1,7 +1,7 @@
 import imageType from "image-type";
-import { getUserPlateData, getVehicleById, saveToFirestore } from "./firestore.js";
+import { getTotalVehicle, getTotalVehicleDaily, getTotalVehicleMonthly, getTotalVehiclePerRegion, getUserPlateData, getVehicleById, saveToFirestore } from "./firestore.js";
 import uploadToGCS from "./gcs.js";
-import predictImage from "./ml.js";
+import { predictImage } from "./ml.js";
 import { base64ToBuffer } from "./utils.js";
 
 export async function handleDetect (req, res) {
@@ -10,7 +10,7 @@ export async function handleDetect (req, res) {
       return res.status(400).json({ message: "No image uploaded" });
     }
 
-    const { uid } = req.cookies
+    const { uid } = req.cookies;
 
     let result;
     try {
@@ -67,7 +67,7 @@ export async function handleGetList(req, res) {
 export async function handleGetDetail(req, res) {
   try {
     const { uid } = req.cookies;
-    const { plateDataId } = req.params
+    const { plateDataId } = req.params;
 
     const result = await getVehicleById(plateDataId);
 
@@ -82,5 +82,49 @@ export async function handleGetDetail(req, res) {
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+}
+
+export async function handleGetTotalVehicle(req, res) {
+  try {
+    const { uid } = req.cookies;
+    const result = await getTotalVehicle(uid)
+
+    res.status(200).json(result);
+  } catch (error){
+    res.status(500).json({ error: error.message })
+  }
+}
+
+export async function handleGetTotalVehiclePerRegion(req, res) {
+  try {
+    const { uid } = req.cookies;
+    const result = await getTotalVehiclePerRegion(uid)
+
+    res.status(200).json(result);
+  } catch (error){
+    res.status(500).json({ error: error.message })
+  }
+}
+
+export async function handleGetTotalVehicleDaily(req, res) {
+  try {
+    const { uid } = req.cookies;
+    const result = await getTotalVehicleDaily(uid)
+
+    res.status(200).json(result);
+  } catch (error){
+    res.status(500).json({ error: error.message })
+  }
+}
+
+export async function handleGetTotalVehicleMonthly(req, res) {
+  try {
+    const { uid } = req.cookies;
+    const result = await getTotalVehicleMonthly(uid)
+
+    res.status(200).json(result);
+  } catch (error){
+    res.status(500).json({ error: error.message })
   }
 }

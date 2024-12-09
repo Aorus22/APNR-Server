@@ -1,10 +1,10 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-const ML_URL = 'https://apnr-ml-994118876089.asia-southeast2.run.app/predict';
+export const ML_URL = 'https://apnr-ml-994118876089.asia-southeast2.run.app/predict';
 // const ML_URL = 'http://localhost:8080/predict';
 
-export default async function predictImage(image) {
+export async function predictImage(image) {
   try {
     const form = new FormData();
     form.append('file', image, {
